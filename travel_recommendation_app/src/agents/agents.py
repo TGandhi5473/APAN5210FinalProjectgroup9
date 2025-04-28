@@ -42,6 +42,7 @@ class RecommenderAgent(Agent):
         super().__init__(
             model=OpenAIChat(id="gpt-3.5-turbo"),  # Use OpenAI GPT-3.5 Turbo model
             tools=[],  # No tools needed for this agent
+            description="You are an evaluator of search results, pick the best search results based on user input"
         )
         self.shared_memory = shared_memory
 
@@ -53,29 +54,26 @@ class RecommenderAgent(Agent):
         if not all([user_input, search_query, search_results]):
             raise ValueError("Missing required data in shared_memory for recommendation.")
 
-        # Use Mistral to evaluate the search path
+        # Use the LLM to evaluate the search results based on both user input and search query
         evaluation = self.evaluate_search_path(user_input, search_query, search_results)
 
         # Store evaluation in shared memory
         self.shared_memory.set("evaluation", evaluation)
 
     def evaluate_search_path(self, user_input, search_query, search_results):
-        # Limit search_results to first 500 characters
+        # Limit search_results to first 500 characters for concise evaluation
         short_results = str(search_results)[:500]
 
-        # Construct prompt for Mistral
+        # Construct a prompt that includes both user input and search query
         prompt = f"""
-        Evaluate if search query '{search_query}' matched user input '{user_input}' based on these results: '{short_results}'.
-        Score from 1 to 10 and give a brief reason.
+        Based on the user input: '{user_input}' and the search query: '{search_query}', evaluate the following search results: '{short_results}'.
+        Pick the best results, score from 1 to 10, and provide a brief reason for your evaluation.
         """
 
-        # Use Mistral to generate evaluation
+        # Use the LLM to generate evaluation
         evaluation = self.run(prompt)
 
         return evaluation
-
-
-
 from agno.models.openai import OpenAIChat
 
 class SummarizerAgent(Agent):
