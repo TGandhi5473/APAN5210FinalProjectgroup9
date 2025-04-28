@@ -78,25 +78,18 @@ class RecommenderAgent(Agent):
         return evaluation
 
 
-class SummarizerAgent(Agent):
-    def __init__(self, shared_memory, model_id: str = "gpt-3.5-turbo"):
-        super().__init__(
-            model=OpenAIChat(id=model_id),
-            description="You are a travel recommendation summarizer. You take outputs from the RecommenderAgent and generate concise summaries for users.",
-            markdown=True
-        )
-        self.shared_memory = shared_memory
-
-    def execute(self, style: str = "bullet"):
-        logging.info("SummarizerAgent execution started.")
-        recommendations_text = self.shared_memory.get("evaluation")
-        if not recommendations_text:
-            raise ValueError("No recommendations found in shared_memory to summarize.")
-
-        prompt = self._build_prompt(recommendations_text, style)
-        summary = self.run(prompt)
-        self.shared_memory.set("summary", summary)
-        logging.info("SummarizerAgent execution completed successfully.")
-
-    def _build_prompt(self,
+def _build_prompt(self, recommendations_text: str, style: str) -> str:
+        """Build a prompt for summarizing recommendations based on the desired style."""
+        if style == "bullet":
+            return f"""
+            Summarize the following recommendations using bullet points:
+            {recommendations_text}
+            """
+        elif style == "paragraph":
+            return f"""
+            Summarize the following recommendations in a concise paragraph:
+            {recommendations_text}
+            """
+        else:
+            raise ValueError(f"Unsupported style: {style}. Supported styles are 'bullet' and 'paragraph'.")
 
