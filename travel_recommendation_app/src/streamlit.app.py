@@ -20,8 +20,11 @@ translation_agent = TranslationAgent(shared_memory)
 st.title("🌍 Travel Recommendation App")
 
 # User Inputs
-user_input = st.text_input("Enter your travel preferences or questions:")
-target_language = st.selectbox("Select output language:", ["English", "French", "Spanish", "German", "Chinese"])
+user_input = st.text_input("Enter a location you want to explore:")
+target_language = st.selectbox(
+    "Select output language:",
+    ["English", "French", "Spanish", "German", "Chinese", "Japanese", "Korean", "Portuguese", "Italian", "Russian"]
+)
 
 if st.button("Get Recommendations"):
     if not user_input:

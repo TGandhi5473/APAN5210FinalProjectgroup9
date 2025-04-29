@@ -20,7 +20,10 @@ class WebSearchAgent(Agent):
         self.shared_memory.set("search_query", search_query)
         
         # Perform web search using DuckDuckGoTools
-        prompt = f"Use web search to find relevant travel information for: '{search_query}'"
+        prompt = f"""
+        You are a travel assistant. Use the DuckDuckGo web search tool to find the best tourist attractions, sightseeing locations, and must-visit places for: '{search_query}'.
+        Only return fun activities, famous places, and popular destinations — avoid visa, government, or immigration information.
+        """
         search_results = self.run(prompt)
 
         # Store search results in shared memory
@@ -64,11 +67,21 @@ class RecommenderAgent(Agent):
         # Limit search_results to first 500 characters for concise evaluation
         short_results = str(search_results)[:500]
 
-        # Construct a prompt that includes both user input and search query
+        # Updated prompt as requested
         prompt = f"""
-        Based on the user input: '{user_input}' and the search query: '{search_query}', evaluate the following search results: '{short_results}'.
-        Pick the best results, score from 1 to 10, and provide a brief reason for your evaluation.
-        """
+From the following web search results related to '{search_query}' and the user's interest '{user_input}', create a list of 5-10 top recommended tourist attractions, sightseeing locations, or must-visit places.
+
+For each pGrealace:
+- Name the place
+- Give a short description (1-2 sentences) about why it is worth visiting
+- Rate the place from 1 to 10 based on its overall popularity and visitor interest
+
+Ignore visas, safety advisories, or government websites.
+
+Here are the search results: '{short_results}'
+
+Return the list clearly organized, using bullet points or numbering.
+"""
 
         # Use the LLM to generate evaluation
         evaluation = self.run(prompt)
@@ -96,7 +109,7 @@ class SummarizerAgent(Agent):
     def _build_prompt(self, text, style):
         """Build prompt based on the requested summary style."""
         if style == "bullet":
-            return f"Summarize the following recommended NYC travel places into concise bullet points:\n\n{text}"
+            return f"Organize and clean up the following list of travel places into concise, attractive bullet points for travelers:\n\n{text}"
         elif style == "headline":
             return f"Create a short and catchy headline summarizing these recommended NYC travel places:\n\n{text}"
         else:
